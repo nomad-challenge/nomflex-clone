@@ -58,6 +58,8 @@ table {
 }
 a {
   text-decoration: none;
+  color: #fff;
+  
 }
 `;
 function App() {

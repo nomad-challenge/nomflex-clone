@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { Link, useMatch } from "react-router-dom";
 import { styled } from "styled-components";
 
@@ -7,8 +8,9 @@ const Nav = styled.nav`
   justify-content: space-between;
   align-items: center;
   position: fixed;
-  width: 100%;
   top: 0;
+  left: 0;
+  right: 0;
   background-color: black;
   font-size: 14px;
   padding: 20px 60px;
@@ -46,7 +48,10 @@ const Item = styled.li`
   }
 `;
 const Search = styled.span`
+  display: flex;
+  align-items: center;
   color: white;
+  position: relative;
   svg {
     height: 25px;
   }
@@ -64,6 +69,11 @@ const Circle = styled(motion.span)`
   margin: 0 auto;
 `;
 
+const Input = styled(motion.input)`
+  position: absolute;
+  transform-origin: right;
+  left: -145px;
+`;
 const logoVariants = {
   init: { fillOpacity: 1 },
   hover: {
@@ -74,6 +84,8 @@ const logoVariants = {
 const Header = () => {
   const homeMatch = useMatch("/");
   const tvMatch = useMatch("/tv");
+  const [isOpenSearch, setIsOpenSearch] = useState(false);
+  const toggleSearch = () => setIsOpenSearch((prev) => !prev);
   return (
     <Nav>
       <Col>
@@ -104,8 +116,12 @@ const Header = () => {
         </Items>
       </Col>
       <Col>
-        <Search>
-          <svg
+        <Search onClick={toggleSearch}>
+          <motion.svg
+            animate={{
+              x: isOpenSearch ? -170 : 0,
+            }}
+            transition={{ type: "linear" }}
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +131,12 @@ const Header = () => {
               d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
               clipRule="evenodd"
             ></path>
-          </svg>
+          </motion.svg>
+          <Input
+            animate={{ scaleX: isOpenSearch ? 1 : 0 }}
+            transition={{ type: "linear" }}
+            placeholder="Search for move or tv shows..."
+          />
         </Search>
       </Col>
     </Nav>
