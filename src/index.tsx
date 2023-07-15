@@ -38,9 +38,11 @@ footer, header, hgroup, main, menu, nav, section {
     display: none;
 }
 body {
-  line-height: 1;
+  line-height: 1.2;
   box-sizing: border-box;
   font-family: 'Lunasima', sans-serif;
+  color: ${(props) => props.theme.white.darker};
+  background-color: black;
 }
 menu, ol, ul {
   list-style: none;
