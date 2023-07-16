@@ -55,13 +55,19 @@ const Box = styled(motion.div)`
 `;
 
 const Home = () => {
+  const [leaving, setLeaving] = useState(false);
   const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["movies", "now_playing"],
     getMovies
   );
 
   const [index, setIndex] = useState(0);
-  const increase = () => setIndex((prev) => prev + 1);
+  const increase = () => {
+    if (leaving) return;
+    toggleLeaving();
+    setIndex((prev) => prev + 1);
+  };
+  const toggleLeaving = () => setLeaving((prev) => !prev);
   return (
     <Wrapper>
       {isLoading ? (
@@ -76,7 +82,7 @@ const Home = () => {
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
           <Slider>
-            <AnimatePresence>
+            <AnimatePresence onExitComplete={toggleLeaving}>
               <Row
                 initial={{ x: window.outerWidth + 10 }}
                 animate={{ x: 0 }}
