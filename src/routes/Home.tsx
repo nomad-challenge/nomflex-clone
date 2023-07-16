@@ -4,6 +4,7 @@ import { styled } from "styled-components";
 import { makeImagePath } from "../utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { off } from "process";
 
 const Wrapper = styled.div`
   background-color: black;
@@ -42,18 +43,21 @@ const Slider = styled.div`
 `;
 const Row = styled(motion.div)`
   display: grid;
-  gap: 10px;
+  gap: 5px;
   grid-template-columns: repeat(6, 1fr);
   position: absolute;
   width: 100%;
 `;
-const Box = styled(motion.div)`
-  background-color: white;
+const Box = styled(motion.div)<{ bgPhoto: string }>`
   height: 200px;
   color: red;
   font-size: 60px;
+  background-image: url(${(props) => props.bgPhoto});
+  background-size: cover;
+  background-position: center center;
 `;
 
+const offset = 6;
 const Home = () => {
   const [leaving, setLeaving] = useState(false);
   const { data, isLoading } = useQuery<IGetMoviesResult>(
@@ -63,9 +67,13 @@ const Home = () => {
 
   const [index, setIndex] = useState(0);
   const increase = () => {
-    if (leaving) return;
-    toggleLeaving();
-    setIndex((prev) => prev + 1);
+    if (data) {
+      if (leaving) return;
+      toggleLeaving();
+      const totalMovies = data?.results.length - 1;
+      const maxIndex = Math.ceil(totalMovies / offset) - 1;
+      setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+    }
   };
   const toggleLeaving = () => setLeaving((prev) => !prev);
   return (
@@ -84,15 +92,21 @@ const Home = () => {
           <Slider>
             <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
               <Row
-                initial={{ x: window.outerWidth + 10 }}
+                initial={{ x: window.outerWidth + 5 }}
                 animate={{ x: 0 }}
-                exit={{ x: -window.outerWidth - 10 }}
+                exit={{ x: -window.outerWidth - 5 }}
                 key={index}
                 transition={{ type: "tween", duration: 0.8 }}
               >
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Box key={i}>{i}</Box>
-                ))}
+                {data?.results
+                  .slice(1)
+                  .slice(offset * index, offset * index + offset)
+                  .map((movie) => (
+                    <Box
+                      key={movie.id}
+                      bgPhoto={makeImagePath(movie.backdrop_path, "w400")}
+                    ></Box>
+                  ))}
               </Row>
             </AnimatePresence>
           </Slider>
