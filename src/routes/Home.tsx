@@ -1,11 +1,17 @@
 import { useQuery } from "react-query";
-import { IGetMoviesResult, getMovies } from "../api";
+import {
+  IGetMoviesResult,
+  IGetPopularMoviesResult,
+  IGetTopRatedMoviesResult,
+  getMovies,
+  getPopularMovies,
+  getTopRatedMovies,
+  getUpcomingMovies,
+} from "../api";
 import { styled } from "styled-components";
 import { makeImagePath } from "../utils";
-import { AnimatePresence, motion, useScroll } from "framer-motion";
 import { useState } from "react";
-import { useMatch, useNavigate } from "react-router-dom";
-import BigMovie from "../components/BigMovie";
+import Slider from "../components/Slider";
 
 const Wrapper = styled.div`
   background-color: black;
@@ -38,73 +44,30 @@ const Overview = styled.p`
   width: 50%;
 `;
 
-const Slider = styled.div`
-  position: relative;
-  top: -100px;
-  margin-bottom: 50px;
-`;
-const Row = styled(motion.div)`
-  display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(6, 1fr);
-  position: absolute;
-  width: 100%;
-`;
-const Box = styled(motion.div)<{ bgPhoto: string }>`
-  height: 150px;
-  font-size: 60px;
-  background-image: url(${(props) => props.bgPhoto});
-  background-size: cover;
-  background-position: center center;
-  cursor: pointer;
-  &:first-child {
-    transform-origin: center left;
-  }
-  &:last-child {
-    transform-origin: center right;
-  }
-`;
-
-const Info = styled(motion.div)`
-  padding: 10px;
-  background-color: ${(props) => props.theme.black.lighter};
-  opacity: 0;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  h4 {
-    font-size: 18px;
-    text-align: center;
-  }
-`;
-
-const boxVariants = {
-  normal: { scale: 1 },
-  hover: {
-    y: -50,
-    scale: 1.3,
-    transition: { type: "tween", duration: 0.3, delay: 0.5 },
-  },
-};
-const infoVariants = {
-  hover: {
-    opacity: 1,
-    transition: { type: "tween", duration: 0.3, delay: 0.5 },
-  },
-};
 const offset = 6;
 const Home = () => {
-  const navigate = useNavigate();
-  const bigMovieMatch = useMatch("/movies/:movieId");
-  const { scrollY } = useScroll();
   const [leaving, setLeaving] = useState(false);
   const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["movies", "now_playing"],
     getMovies
   );
 
+  const { data: polularData, isLoading: popularLoading } =
+    useQuery<IGetPopularMoviesResult>(["movies", "polular"], getPopularMovies);
+  const { data: topRatedData, isLoading: topRatedLoading } =
+    useQuery<IGetTopRatedMoviesResult>(
+      ["movies", "topRated"],
+      getTopRatedMovies
+    );
+
+  const { data: upcomingData, isLoading: upcomingLoading } = useQuery(
+    ["movies", "upcoming"],
+    getUpcomingMovies
+  );
   const [index, setIndex] = useState(0);
+  const [popularIndex, setPopularIndex] = useState(0);
+  const [topRatedIndex, setTopRatedIndex] = useState(0);
+  const [upcomingIndex, setUpcomingIndex] = useState(0);
   const increase = () => {
     if (data) {
       if (leaving) return;
@@ -112,17 +75,26 @@ const Home = () => {
       const totalMovies = data?.results.length - 1;
       const maxIndex = Math.ceil(totalMovies / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+
+      if (polularData) {
+        const totalPolularMovies = polularData?.results.length;
+        const maxPolularIndex = Math.ceil(totalPolularMovies / offset) - 1;
+        setPopularIndex((prev) => (prev === maxPolularIndex ? 0 : prev + 1));
+      }
+      if (topRatedData) {
+        const totalTopRatedMovies = topRatedData?.results.length;
+        const maxTopRatedIndex = Math.ceil(totalTopRatedMovies / offset) - 1;
+        setTopRatedIndex((prev) => (prev === maxTopRatedIndex ? 0 : prev + 1));
+      }
+      if (upcomingData) {
+        const totalUpcomingMovies = upcomingData?.results.length;
+        const maxUpcomingIndex = Math.ceil(totalUpcomingMovies / offset) - 1;
+        setUpcomingIndex((prev) => (prev === maxUpcomingIndex ? 0 : prev + 1));
+      }
     }
   };
   const toggleLeaving = () => setLeaving((prev) => !prev);
-  const onBoxClick = (movieId: number) => {
-    navigate(`/movies/${movieId}`);
-  };
 
-  const clickedMovie = () =>
-    data?.results.find(
-      (movie) => String(movie.id) === bigMovieMatch?.params.movieId
-    );
   return (
     <Wrapper>
       {isLoading ? (
@@ -136,46 +108,46 @@ const Home = () => {
             <Title>{data?.results[0].title}</Title>
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
-          <Slider>
-            <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
-              <Row
-                initial={{ x: window.outerWidth + 5 }}
-                animate={{ x: 0 }}
-                exit={{ x: -window.outerWidth - 5 }}
-                key={index}
-                transition={{ type: "tween", duration: 0.8 }}
-              >
-                {data?.results
-                  .slice(1)
-                  .slice(offset * index, offset * index + offset)
-                  .map((movie) => (
-                    <Box
-                      key={movie.id}
-                      bgPhoto={makeImagePath(movie.backdrop_path, "w400")}
-                      variants={boxVariants}
-                      initial="normal"
-                      whileHover="hover"
-                      transition={{ type: "tween" }}
-                      onClick={() => onBoxClick(movie.id)}
-                      layoutId={movie.id + ""}
-                    >
-                      <Info variants={infoVariants}>
-                        <h4>{movie.title}</h4>
-                      </Info>
-                    </Box>
-                  ))}
-              </Row>
-            </AnimatePresence>
-          </Slider>
-          <AnimatePresence>
-            {bigMovieMatch && bigMovieMatch.params.movieId ? (
-              <BigMovie
-                movieId={bigMovieMatch.params.movieId}
-                scrollY={scrollY.get()}
-                movie={clickedMovie()}
-              />
-            ) : null}
-          </AnimatePresence>
+          {data?.results && (
+            <Slider
+              title="Now Playing"
+              index={index}
+              offset={offset}
+              movies={data.results.slice(1)}
+              toggleLeaving={toggleLeaving}
+              category="movies"
+            />
+          )}
+          {polularData?.results && (
+            <Slider
+              title="Polular"
+              index={popularIndex}
+              offset={offset}
+              movies={polularData.results}
+              toggleLeaving={toggleLeaving}
+              category="movies"
+            />
+          )}
+          {topRatedData?.results && (
+            <Slider
+              title="Top Rated"
+              index={topRatedIndex}
+              offset={offset}
+              movies={topRatedData.results}
+              toggleLeaving={toggleLeaving}
+              category="movies"
+            />
+          )}
+          {upcomingData?.results && (
+            <Slider
+              title="Upcoming"
+              index={upcomingIndex}
+              offset={offset}
+              movies={upcomingData.results}
+              toggleLeaving={toggleLeaving}
+              category="movies"
+            />
+          )}
         </>
       )}
     </Wrapper>

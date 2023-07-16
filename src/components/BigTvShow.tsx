@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { styled } from "styled-components";
-import { IMovie, IMovieDetail, getMovieById } from "../api";
+import { ITvShow, ITvShowDetail, getTvShowById } from "../api";
 import { makeImagePath } from "../utils";
 import { useQuery } from "react-query";
 
@@ -58,17 +58,20 @@ const Genre = styled.span`
   background-color: ${(props) => props.theme.white.lighter};
   color: ${(props) => props.theme.black.darker};
 `;
-interface IBigMovie {
+
+interface IBigTvShow {
   layoutId: string;
   scrollY: number;
-  movie?: IMovie;
+  tvShow?: ITvShow;
 }
-const BigMovie: React.FC<IBigMovie> = ({ layoutId, scrollY, movie }) => {
+const BigTvShow: React.FC<IBigTvShow> = ({ layoutId, scrollY, tvShow }) => {
   const navigate = useNavigate();
-  const onOverlayClick = () => navigate("/", { replace: true });
 
-  const { data, isLoading } = useQuery<IMovieDetail>(["movie", movie?.id], () =>
-    getMovieById(movie?.id)
+  const onOverlayClick = () => navigate("/tv", { replace: true });
+
+  const { data, isLoading } = useQuery<ITvShowDetail>(
+    ["tvShow", tvShow?.id],
+    () => getTvShowById(tvShow?.id)
   );
   return (
     <>
@@ -82,18 +85,18 @@ const BigMovie: React.FC<IBigMovie> = ({ layoutId, scrollY, movie }) => {
         style={{ top: scrollY + 100 }}
         animate={{ zIndex: 99 }}
       >
-        {movie && (
+        {tvShow && (
           <>
             <BigCover
               style={{
                 backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
-                  movie.backdrop_path,
+                  tvShow.backdrop_path || tvShow.poster_path,
                   "w500"
                 )})`,
               }}
             />
-            <BigTitle>{movie.title}</BigTitle>
-            <BigOverview>{movie.overview}</BigOverview>
+            <BigTitle>{tvShow.name}</BigTitle>
+            <BigOverview>{tvShow.overview}</BigOverview>
             <GenreWrapper>
               {data?.genres.map((genre) => (
                 <Genre>{genre.name}</Genre>
@@ -106,4 +109,4 @@ const BigMovie: React.FC<IBigMovie> = ({ layoutId, scrollY, movie }) => {
   );
 };
 
-export default BigMovie;
+export default BigTvShow;

@@ -5,7 +5,8 @@ import {
   useScroll,
 } from "framer-motion";
 import { useState } from "react";
-import { Link, useMatch } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { Link, useMatch, useNavigate } from "react-router-dom";
 import { styled } from "styled-components";
 
 const Nav = styled(motion.nav)`
@@ -51,7 +52,7 @@ const Item = styled.li`
     color: ${(props) => props.theme.white.lighter};
   }
 `;
-const Search = styled.span`
+const Search = styled.form`
   display: flex;
   align-items: center;
   color: white;
@@ -82,6 +83,7 @@ const Input = styled(motion.input)`
   background-color: transparent;
   border: 1px solid ${(props) => props.theme.white.lighter};
   border-radius: 2px;
+  color: ${(props) => props.theme.white.lighter};
 `;
 const logoVariants = {
   init: { fillOpacity: 1 },
@@ -90,7 +92,12 @@ const logoVariants = {
     transition: { repeat: Infinity },
   },
 };
+
+interface IForm {
+  keyword: string;
+}
 const Header = () => {
+  const navigate = useNavigate();
   const homeMatch = useMatch("/");
   const tvMatch = useMatch("/tv");
   const [isOpenSearch, setIsOpenSearch] = useState(false);
@@ -98,6 +105,7 @@ const Header = () => {
   const navAnimation = useAnimation();
   const { scrollY } = useScroll();
 
+  const { register, handleSubmit } = useForm<IForm>();
   const navVariants = {
     top: { backgroundColor: "rgba(0,0,0,0)" },
     scroll: { backgroundColor: "rgba(0,0,0,1)" },
@@ -116,6 +124,11 @@ const Header = () => {
       inputAnimation.start({ scaleX: 1 });
     }
     setIsOpenSearch((prev) => !prev);
+  };
+
+  const onValid = (data: IForm) => {
+    console.log(data);
+    navigate(`/search?keyword=${data.keyword}`);
   };
   return (
     <Nav variants={navVariants} initial="top" animate={navAnimation}>
@@ -147,7 +160,7 @@ const Header = () => {
         </Items>
       </Col>
       <Col>
-        <Search onClick={toggleSearch}>
+        <Search onSubmit={handleSubmit(onValid)}>
           <motion.svg
             animate={{
               x: isOpenSearch ? -140 : 0,
@@ -156,6 +169,7 @@ const Header = () => {
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
+            onClick={toggleSearch}
           >
             <path
               fillRule="evenodd"
@@ -164,6 +178,7 @@ const Header = () => {
             ></path>
           </motion.svg>
           <Input
+            {...register("keyword", { required: true, minLength: 2 })}
             initial={{ scaleX: 0 }}
             animate={inputAnimation}
             transition={{ type: "linear" }}
