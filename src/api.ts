@@ -27,10 +27,9 @@ export interface IGetMoviesResult {
   total_resuls: number;
 }
 export const getMovies = () => {
-  return fetch(
-    `${BASE_PATH}/movie/now_playing/?language=en-US&page=1&region=kr`,
-    options
-  ).then((res) => res.json());
+  return fetch(`${BASE_PATH}/movie/now_playing`, options).then((res) =>
+    res.json()
+  );
 };
 
 export interface ITopRatedMovie {

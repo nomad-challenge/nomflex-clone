@@ -48,5 +48,8 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://nomad-challenge.github.io/nomflix-clone"
+  "homepage": "https://nomad-challenge.github.io/nomflix-clone",
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  }
 }

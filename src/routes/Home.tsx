@@ -103,7 +103,11 @@ const Home = () => {
         <>
           <Banner
             onClick={increase}
-            bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}
+            bgPhoto={makeImagePath(
+              data?.results[0].backdrop_path ||
+                data?.results[0].poster_path ||
+                ""
+            )}
           >
             <Title>{data?.results[0].title}</Title>
             <Overview>{data?.results[0].overview}</Overview>
