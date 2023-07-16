@@ -64,6 +64,9 @@ a {
   color: #fff;
   
 }
+::-webkit-scrollbar {
+display: none;
+}
 `;
 
 const client = new QueryClient();

@@ -4,11 +4,10 @@ import { styled } from "styled-components";
 import { makeImagePath } from "../utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { off } from "process";
 
 const Wrapper = styled.div`
   background-color: black;
-  overflow: hidden;
+  /* overflow: hidden; */
 `;
 const Loader = styled.div`
   display: flex;
@@ -49,14 +48,28 @@ const Row = styled(motion.div)`
   width: 100%;
 `;
 const Box = styled(motion.div)<{ bgPhoto: string }>`
-  height: 200px;
+  height: 100px;
   color: red;
   font-size: 60px;
   background-image: url(${(props) => props.bgPhoto});
   background-size: cover;
   background-position: center center;
+  &:first-child {
+    transform-origin: center left;
+  }
+  &:last-child {
+    transform-origin: center right;
+  }
 `;
 
+const boxVariants = {
+  normal: { scale: 1 },
+  hover: {
+    y: -50,
+    scale: 1.3,
+    transition: { type: "tween", duration: 0.3, delay: 0.5 },
+  },
+};
 const offset = 6;
 const Home = () => {
   const [leaving, setLeaving] = useState(false);
@@ -105,6 +118,10 @@ const Home = () => {
                     <Box
                       key={movie.id}
                       bgPhoto={makeImagePath(movie.backdrop_path, "w400")}
+                      variants={boxVariants}
+                      initial="normal"
+                      whileHover="hover"
+                      transition={{ type: "tween" }}
                     ></Box>
                   ))}
               </Row>
