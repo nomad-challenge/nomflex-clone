@@ -82,7 +82,7 @@ const Home = () => {
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
           <Slider>
-            <AnimatePresence onExitComplete={toggleLeaving}>
+            <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
               <Row
                 initial={{ x: window.outerWidth + 10 }}
                 animate={{ x: 0 }}
