@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { styled } from "styled-components";
 import { IMovie } from "../api";
 import { useEffect } from "react";
+import { makeImagePath } from "../utils";
 
 const Overlay = styled(motion.div)`
   position: fixed;
@@ -19,9 +20,28 @@ const Wrapper = styled(motion.div)`
   right: 0px;
   left: 0px;
   margin: 0px auto;
-  background-color: red;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: ${(props) => props.theme.black.lighter};
 `;
 
+const BigCover = styled.div`
+  width: 100%;
+  height: 400px;
+  background-size: cover;
+  background-position: center center;
+`;
+const BigTitle = styled.h2`
+  font-size: 46px;
+  padding: 20px;
+  top: -80px;
+  position: relative;
+`;
+const BigOverview = styled.p`
+  padding: 20px;
+  top: -80px;
+  position: relative;
+`;
 interface IBigMovie {
   movieId: string;
   scrollY: number;
@@ -43,7 +63,16 @@ const BigMovie: React.FC<IBigMovie> = ({ movieId, scrollY, movie }) => {
       <Wrapper layoutId={movieId} style={{ top: scrollY + 100 }}>
         {movie && (
           <>
-            <h2>{movie.title}</h2>
+            <BigCover
+              style={{
+                backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
+                  movie.backdrop_path,
+                  "w500"
+                )})`,
+              }}
+            />
+            <BigTitle>{movie.title}</BigTitle>
+            <BigOverview>{movie.overview}</BigOverview>
           </>
         )}
       </Wrapper>
